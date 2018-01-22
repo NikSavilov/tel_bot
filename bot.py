@@ -2,12 +2,8 @@ import telebot
 import requests
 from bs4 import BeatifulSoup
 
-access_token = 335894434:AAF8cRoHH8syXSBzhJqeYrrwnaiBKDTnefY
+access_token = 335894434:BAF8cRoHH8syXSBzhJqeYrrwnaiBKDTnefY
 bot = telebot.TeleBot(access_token)
-@bot.message_handler(content_types=['text'])
-
-def echo(message):
-    bot.send_message(message.chat.id, message.text)
 
 def get_page(group = 'M3100', week = ''):
     if week:	
