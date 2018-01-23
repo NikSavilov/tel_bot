@@ -29,8 +29,7 @@ def get_schedule(page, day = '1'):
     lessons_list = [', '.join([info for info in lesson if info]) for lesson in lessons_list]
     return time_list, room_list, lessons_list
 
-@bot.message_handler(commands=['monday'])
-def get_monday(message):
+def send_schedule(message):
     _, group = message.text.split()
     web_page = get_page(group)
     times_lst, locations_lst, lessons_lst = get_schedule(web_page)
@@ -40,6 +39,11 @@ def get_monday(message):
         resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
 
     bot.send_message(message.chat.id, resp, parse_mode='HTML')
+
+@bot.message_handler(content_types=["text"])
+def define_request_type(message):
+	words = message.text.split()
+	
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
