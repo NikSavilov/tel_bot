@@ -50,14 +50,19 @@ def find_longest_word(message):
 #### Getting messages from some chat and creating a bot #####
 access_token = '335894434:AAF8cRoHH8syXSBzhJqeYrrwnaiBKDTnefY'
 bot = telebot.TeleBot(access_token)
-profile = 175747053	# mal 175747053 # ler 101909873
+profile = 101909873	# mal 175747053 # ler 101909873 rya 86124924
 messages = vk.messages_aggregator(profile)
-
+#[messages.append(item) for item in vk.messages_aggregator(175747053)]
 ##############################################################
 
 @bot.message_handler(content_types=["text"])
+def stupid(message):
+	bot.send_message(message.chat.id,'Хозяин отключил меня, потому что я слишком много знаю.')
+	pass
+
 def define_request_type(message,messages = messages):
 	try:
+		print(message.text)
 		message.text = message.text.lower() 
 		answers = [{'num': num, 'text': mes['body'].lower(), 'from_id': mes['from_id'] } for num, mes in enumerate(messages)]
 		founded_requests = []
