@@ -4,7 +4,6 @@ from selenium import webdriver
 from PIL import Image
 from selenium.webdriver.common.by import By
 import mysql.connector
-from rutermextract import TermExtractor
 import pymorphy2
 
 def get_screened_page(from_station, to_station):
@@ -40,24 +39,22 @@ def stations_parser():
 	cursor = cnx.cursor()
 	DRIVER = 'chromedriver'
 	driver = webdriver.Chrome(DRIVER)
-	for i in range(67,68):
-		url = 'https://metro.yandex.ru/spb?from={i}&to=1&route=0'.format(i = i)
+	for i in range(1,67):
+		url = 'https://metro.yandex.ru/spb?from={i}&to=67&route=0'.format(i = i)
 		driver.get(url)
 		time.sleep(2)
 		metro_name = driver.find_element(By.CLASS_NAME, "route-details-block__terminal-station").text
-		print(metro_name)
-		term_extractor = TermExtractor()
-		metro_normalized = ""
-		for term in term_extractor(metro_name, strings=True):
-			metro_normalized = term
-		if len(metro_normalized) < 2:
-			metro_normalized = metro_name.lower()
-		print(metro_normalized)
+		metro_normalized = string_normalizer(metro_name)
 		request = "insert into stations(number, name) values ({number},{name})".format(number = i, name = '"' + metro_normalized + '"')
-		#print(request)
 		cursor.execute(request)
 		cnx.commit()
 	pass
+
+def string_normalizer(message):
+	message = message.split()
+	morph = pymorphy2.MorphAnalyzer()
+	message = [morph.parse(word)[0].normal_form for word in message]
+	return " ".join(message)
 
 def text_request_definer(message):
 	bugs_list = [
@@ -83,12 +80,11 @@ def text_request_definer(message):
 				from_station.append(word)
 			elif flag_to:
 				to_station.append(word)
-	morph = pymorphy2.MorphAnalyzer()
-	from_normalized = [morph.parse(word)[0].normal_form for word in from_station]
-	to_normalized = [morph.parse(word)[0].normal_form for word in to_station]
+	from_normalized = string_normalizer(" ".join(from_station))
+	to_normalized = string_normalizer(" ".join(to_station))
 	
 	return from_normalized, to_normalized
 
 # get_screened_page(67,6)
-#stations_parser()
-print(text_request_definer('проложи маршрут на метро от академической до технологического института'))
+stations_parser()
+#print(text_request_definer('проложи маршрут на метро от академической до технологического института'))
