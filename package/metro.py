@@ -39,8 +39,8 @@ def stations_parser():
 	cursor = cnx.cursor()
 	DRIVER = 'chromedriver'
 	driver = webdriver.Chrome(DRIVER)
-	for i in range(1,67):
-		url = 'https://metro.yandex.ru/spb?from={i}&to=67&route=0'.format(i = i)
+	for i in range(67,68):
+		url = 'https://metro.yandex.ru/spb?from={i}&to=1&route=0'.format(i = i)
 		driver.get(url)
 		time.sleep(2)
 		metro_name = driver.find_element(By.CLASS_NAME, "route-details-block__terminal-station").text
@@ -62,12 +62,14 @@ def text_request_definer(message):
 	'метро', 
 	'станция', 
 	'проложи', 
-	'на'
+	'на',
+	'дорога'
 	]
 	message = message.split()
 	text = [word for word in message if word not in bugs_list]
 	from_station = []
 	to_station = []
+	flag_from, flag_to = False, False
 	for word in text:
 		if word == 'от':
 			flag_from = True
@@ -82,9 +84,24 @@ def text_request_definer(message):
 				to_station.append(word)
 	from_normalized = string_normalizer(" ".join(from_station))
 	to_normalized = string_normalizer(" ".join(to_station))
-	
 	return from_normalized, to_normalized
 
+def number_definer(name_of_station):
+	cnx = mysql.connector.connect(
+		user='ih813395_bot', 
+		password='123123123bot',
+		host='185.125.219.232',
+		database='ih813395_bot_metro')
+	cursor = cnx.cursor()
+	request = "select number from stations where name = '{name_of_station}'".format(name_of_station = name_of_station)
+	cursor.execute(request)
+	print(request)
+	number = int(cursor.fetchall()[0][0])
+	print(number)
+	return number
+
+
+# number_definer('академический')
 # get_screened_page(67,6)
-stations_parser()
-#print(text_request_definer('проложи маршрут на метро от академической до технологического института'))
+# stations_parser()
+# print(text_request_definer('проложи маршрут на метро от академической до технологического института'))

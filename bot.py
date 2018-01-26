@@ -1,6 +1,7 @@
-import telebot, sys, random
+import telebot, sys, random, time
 import requests
 from package import vk
+from package import metro
 from bs4 import BeautifulSoup
 
 def get_page(group = 'M3100', week = ''):
@@ -50,17 +51,43 @@ def find_longest_word(message):
 #### Getting messages from some chat and creating a bot #####
 access_token = '335894434:AAF8cRoHH8syXSBzhJqeYrrwnaiBKDTnefY'
 bot = telebot.TeleBot(access_token)
-profile = 101909873	# mal 175747053 # ler 101909873 rya 86124924
-messages = vk.messages_aggregator(profile)
+#profile = 2	# mal 175747053 # ler 101909873 rya 86124924
+#messages = vk.messages_aggregator(profile)
 #[messages.append(item) for item in vk.messages_aggregator(175747053)]
 ##############################################################
 
 @bot.message_handler(content_types=["text"])
-def stupid(message):
-	bot.send_message(message.chat.id,'Хозяин отключил меня, потому что я слишком много знаю.')
+def text_metro_response(message):
+	try:
+		bot.send_message(message.chat.id,'Погодь.')
+		from_normalized, to_normalized = metro.text_request_definer(message.text)
+		print(from_normalized,to_normalized)
+		from_number = metro.number_definer(from_normalized)
+		to_number = metro.number_definer(to_normalized)
+		time.sleep(1)
+		try:
+			f = open(str(from_number) + '-' + str(to_number) + '.png','r')
+			bot.send_photo(message.chat.id, photo=open('{fro}-{to}.png'.format(fro = from_number, to = to_number), 'rb'))
+			f.close()
+		except:
+			metro.get_screened_page(from_number, to_number)
+			time.sleep(4)
+			photo = open('{fro}-{to}.png'.format(fro = from_number, to = to_number), 'rb')
+			bot.send_photo(message.chat.id, photo )
+			photo.close()
+		time.sleep(7)
+		bot.send_message(message.chat.id,'Счастья тебе, мудила.')
+	except:
+		try:
+			report = open("report.txt","a")
+			report.write('txt: ' + message.text + '\n\n')
+			report.close()
+		except:
+			bot.send_message(message.chat.id,'Не могу сделать report. Бля.')
+		bot.send_message(message.chat.id,'Какой-то херовый запрос, я с ним не справился')
 	pass
 
-def define_request_type(message,messages = messages):
+def define_request_type(message,messages):
 	try:
 		print(message.text)
 		message.text = message.text.lower() 
